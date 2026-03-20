@@ -15,7 +15,8 @@ let emprestimos = [];
 let config = {
   marcas: ['Dell', 'Lenovo', 'HP'],
   modelos: ['Latitude 5420', 'ThinkPad E14', 'ProBook 445'],
-  professores: ['Coordenação', 'Prof. Silva', 'Prof. Maria']
+  professores: ['Coordenação', 'Prof. Silva', 'Prof. Maria'],
+  salas: ['6º ano A', '6º ano B', '7º ano A', 'Auditório']
 };
 
 let pendingCadastro  = [];  // Seriais aguardando cadastro
@@ -398,7 +399,7 @@ function renderPendingEmprestimo() {
 
 document.getElementById('btn-confirmar-emprestimo').addEventListener('click', () => {
   const responsavel = document.getElementById('select-emp-professor').value;
-  const setor       = document.getElementById('input-emp-setor').value.trim();
+  const setor       = document.getElementById('select-emp-sala').value;
   const obs         = document.getElementById('input-emp-obs').value.trim();
   const previsao    = document.getElementById('input-emp-previsao').value;
   const hRetirada   = document.getElementById('input-emp-hora-retirada').value;
@@ -890,6 +891,7 @@ function renderConfig() {
   renderConfigList('list-config-marcas', config.marcas, 'marcas');
   renderConfigList('list-config-modelos', config.modelos, 'modelos');
   renderConfigList('list-config-professores', config.professores, 'professores');
+  renderConfigList('list-config-salas', config.salas, 'salas');
 }
 
 function renderConfigList(elementId, dataList, type) {
@@ -912,6 +914,7 @@ window.removeConfigItem = function(type, index) {
 document.getElementById('btn-add-marca').onclick = () => addConfigItem('input-config-marca', 'marcas');
 document.getElementById('btn-add-modelo').onclick = () => addConfigItem('input-config-modelo', 'modelos');
 document.getElementById('btn-add-professor').onclick = () => addConfigItem('input-config-professor', 'professores');
+document.getElementById('btn-add-sala').onclick = () => addConfigItem('input-config-sala', 'salas');
 
 function addConfigItem(inputId, type) {
   const input = document.getElementById(inputId);
@@ -929,6 +932,7 @@ function updateSelects() {
   const selMarca = document.getElementById('select-cadastro-marca');
   const selMod   = document.getElementById('select-cadastro-modelo');
   const selProf  = document.getElementById('select-emp-professor');
+  const selSala  = document.getElementById('select-emp-sala');
 
   if (selMarca) {
     selMarca.innerHTML = '<option value="">Selecione uma marca...</option>' + 
@@ -941,6 +945,10 @@ function updateSelects() {
   if (selProf) {
     selProf.innerHTML = '<option value="">Selecione um professor...</option>' + 
       config.professores.map(p => `<option value="${p}">${p}</option>`).join('');
+  }
+  if (selSala) {
+    selSala.innerHTML = '<option value="">Selecione a sala...</option>' + 
+      config.salas.map(s => `<option value="${s}">${s}</option>`).join('');
   }
 }
 

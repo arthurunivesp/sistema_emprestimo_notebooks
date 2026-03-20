@@ -174,8 +174,10 @@
             </select>
           </div>
           <div class="form-group">
-            <label for="input-emp-setor">Setor / Turma</label>
-            <input type="text" id="input-emp-setor" placeholder="Ex: Turma A / TI" />
+            <label for="select-emp-sala">Sala / Turma</label>
+            <select id="select-emp-sala">
+              <option value="">Selecione a sala...</option>
+            </select>
           </div>
         </div>
         <div class="form-row" style="background: rgba(231,76,60,0.1); padding: 15px; border-radius: 8px; border: 1px solid var(--danger); margin-bottom: 20px;">
@@ -339,6 +341,19 @@
               <button class="btn btn-primary" id="btn-add-professor">+</button>
             </div>
             <ul id="list-config-professores" class="pending-list" style="margin-top: 10px;"></ul>
+          </div>
+        </div>
+
+        <!-- SALAS / TURMAS -->
+        <div class="form-card">
+          <h3>Salas / Turmas</h3>
+          <div class="form-group" style="margin-top: 15px;">
+            <label>Nome da Sala/Turma</label>
+            <div class="scan-row">
+              <input type="text" id="input-config-sala" placeholder="Ex: 6º ano A, Sala 04" />
+              <button class="btn btn-primary" id="btn-add-sala">+</button>
+            </div>
+            <ul id="list-config-salas" class="pending-list" style="margin-top: 10px;"></ul>
           </div>
         </div>
       </div>
