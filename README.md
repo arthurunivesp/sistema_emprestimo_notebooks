@@ -1,68 +1,68 @@
-💻 NotebookControl — Sistema de Empréstimo de Notebooks Escolar
+💻 NotebookControl — Sistema de Gestão de Notebooks Escolar (v7.0)
 
-O NotebookControl é um sistema web leve, profissional e intuitivo, desenvolvido especialmente para instituições de ensino gerenciarem o empréstimo de notebooks entre professores e setores. O sistema foi projetado para ser operado com um leitor de código de barras, permitindo o controle rápido de packs de equipamentos.
+O NotebookControl é um sistema web profissional desenvolvido para gerenciar o empréstimo de notebooks em instituições de ensino. A versão 7.0 introduz o modelo de Agendamento Prévio e Retirada (Check-in), ideal para organizar a troca de turnos entre professores.
 
 
 
 
 🚀 Principais Funcionalidades
 
-📋 Gestão de Inventário e Status
+📅 Agendamento Inteligente
 
 •
-Cadastro em Lote: Adicione múltiplos notebooks rapidamente lendo os números de série com um leitor de código de barras.
+Reserva Antecipada: Reserve notebooks para professores e salas específicas com antecedência.
+
+•
+Vínculo de Equipamentos: Adicione os notebooks ao agendamento via leitor de código de barras.
+
+•
+Modo Emergencial: Marque agendamentos que exigem autorização especial da coordenação.
+
+🔑 Retirada (Check-in)
+
+•
+Painel de Hoje: Veja todos os agendamentos do dia prontos para retirada.
+
+•
+Confirmação de Saída: Com um clique, ative o empréstimo quando o professor retirar os equipamentos.
+
+•
+Gestão de Pendências: Visualize rapidamente quem ainda não retirou os notebooks agendados.
+
+📋 Gestão de Inventário
+
+•
+Cadastro em Lote: Adicione múltiplos notebooks rapidamente.
 
 •
 Status de Manutenção: Acompanhe o estado de cada equipamento (Disponível, Emprestado, Em Manutenção ou Reparo Profissional).
 
 •
-Configuração de Ativos: Painel para pré-cadastrar Marcas e Modelos, garantindo a padronização do estoque.
-
-⏱️ Controle de Horários e Alertas (Time-Sensitive)
-
-•
-Agendamento de Retirada/Devolução: Defina horários limites para garantir a troca de turnos entre os professores.
-
-•
-Alerta de Proximidade (10 min): O sistema sinaliza automaticamente em amarelo quando faltarem menos de 10 minutos para a devolução.
-
-•
-Cronômetro de Atraso Crítico: Alerta pulsante em vermelho que exibe o tempo exato de atraso, facilitando a cobrança dos equipamentos.
-
-⚠️ Empréstimos Emergenciais
-
-•
-Modo Emergencial: Opção dedicada para empréstimos fora da grade comum, exigindo autorização da coordenação e destacando o registro em vermelho intenso no histórico.
+Configuração de Ativos: Painel para pré-cadastrar Marcas, Modelos e Professores.
 
 📊 Administração e Relatórios
 
 •
-Painel de Configurações: Gerencie listas de Professores, Marcas e Modelos.
+Histórico Completo: Rastreabilidade total de quem agendou, quem retirou e quando devolveu.
 
 •
-Histórico Completo: Rastreabilidade total de quem pegou, quando pegou e quando devolveu.
-
-•
-Exportação CSV: Gere relatórios de estoque para Excel ou Google Sheets com um clique.
+Dashboard em Tempo Real: Estatísticas de estoque e próximos compromissos do dia.
 
 
 
 
 🛠️ Tecnologias Utilizadas
 
-O sistema foi desenvolvido utilizando tecnologias web puras para garantir máxima performance e portabilidade, sem necessidade de servidores complexos ou bancos de dados externos:
+O sistema utiliza tecnologias web puras para garantir máxima performance e portabilidade:
 
 •
-HTML5: Estrutura semântica.
+HTML5 / CSS3: Interface moderna com tema Dark Mode e design responsivo.
 
 •
-CSS3: Interface moderna com tema Dark Mode, animações de alerta e design responsivo.
+JavaScript (ES6+): Lógica de ciclo de vida (Agendado -> Ativo -> Devolvido).
 
 •
-JavaScript (ES6+): Lógica de monitoramento em tempo real, manipulação de dados e cronômetros.
-
-•
-LocalStorage API: Persistência de dados diretamente no navegador (os dados permanecem salvos mesmo após fechar a página).
+LocalStorage API: Persistência de dados diretamente no navegador.
 
 
 
@@ -70,42 +70,36 @@ LocalStorage API: Persistência de dados diretamente no navegador (os dados perm
 📖 Como Usar
 
 1.
-Configuração Inicial: Vá na aba Configurações e cadastre as Marcas, Modelos e os nomes dos Professores.
+Configuração: Vá na aba Configurações e cadastre Marcas, Modelos e Professores.
 
 2.
-Cadastro: Na aba Cadastrar, selecione a Marca/Modelo e use o leitor de código de barras para adicionar os seriais.
+Agendamento: Na aba Agendar, selecione o Professor, a Sala (entrada manual), defina os horários e vincule os notebooks.
 
 3.
-Empréstimo: Na aba Empréstimo, selecione o Professor, defina o horário limite e leia os códigos de barras dos notebooks do pack.
+Retirada: Quando o professor chegar, vá na aba Retirada e clique em "Confirmar Retirada" no cartão correspondente.
 
 4.
-Devolução: Na aba Devolução, basta ler o código de barras do notebook e confirmar. O sistema dará baixa automática no pack correspondente.
+Devolução: Na aba Devolução, leia o código de barras do notebook e confirme para liberar o equipamento.
 
 
 
 
 📦 Instalação
 
-Como o sistema é baseado em tecnologias web padrão, não requer instalação:
-
 1.
 Baixe ou clone este repositório.
 
 2.
-Abra o arquivo index.html em qualquer navegador moderno (Chrome, Edge, Firefox).
+Abra o arquivo index.html em qualquer navegador moderno.
 
 3.
-Dica: Para uso profissional, recomenda-se hospedar no GitHub Pages ou em um servidor local da escola.
+Dica: Recomenda-se o uso de um leitor de código de barras configurado para enviar "Enter" após a leitura.
 
 
 
 
 📄 Licença
 
-Este projeto foi desenvolvido para fins educacionais e de gestão institucional. Sinta-se à vontade para clonar e adaptar às necessidades da sua escola.
+Este projeto foi desenvolvido para fins educacionais e de gestão institucional. Sinta-se à vontade para adaptar às necessidades da sua escola.
 
-
-
-
-Desenvolvido com foco na agilidade e organização do ambiente escolar.
 

@@ -15,8 +15,7 @@ let emprestimos = [];
 let config = {
   marcas: ['Dell', 'Lenovo', 'HP'],
   modelos: ['Latitude 5420', 'ThinkPad E14', 'ProBook 445'],
-  professores: ['Coordenação', 'Prof. Silva', 'Prof. Maria'],
-  salas: ['6º ano A', '6º ano B', '7º ano A', 'Auditório']
+  professores: ['Coordenação', 'Prof. Silva', 'Prof. Maria']
 };
 
 let pendingCadastro  = [];  // Seriais aguardando cadastro
@@ -127,10 +126,7 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     if (btn.dataset.tab === 'estoque')   renderEstoque();
     if (btn.dataset.tab === 'historico') renderHistorico();
     if (btn.dataset.tab === 'dashboard') renderDashboard();
-    if (btn.dataset.tab === 'config') {
-      renderConfig();
-      setupConfigEvents();
-    }
+    if (btn.dataset.tab === 'config')    renderConfig();
     if (btn.dataset.tab === 'cadastro' || btn.dataset.tab === 'emprestimo') updateSelects();
   });
 });
@@ -402,7 +398,7 @@ function renderPendingEmprestimo() {
 
 document.getElementById('btn-confirmar-emprestimo').addEventListener('click', () => {
   const responsavel = document.getElementById('select-emp-professor').value;
-  const setor       = document.getElementById('select-emp-sala').value;
+  const setor       = document.getElementById('input-emp-setor').value.trim();
   const obs         = document.getElementById('input-emp-obs').value.trim();
   const previsao    = document.getElementById('input-emp-previsao').value;
   const hRetirada   = document.getElementById('input-emp-hora-retirada').value;
@@ -890,22 +886,19 @@ function carregarDadosDemo() {
 
 // ─── INICIALIZAÇÃO ────────────────────────────────────────────
 // ─── CONFIGURAÇÕES ─────────────────────────────────────────────
-// ─── CONFIGURAÇÕES (REESCRITO PARA FUNCIONAR 100%) ───────────
 function renderConfig() {
   renderConfigList('list-config-marcas', config.marcas, 'marcas');
   renderConfigList('list-config-modelos', config.modelos, 'modelos');
   renderConfigList('list-config-professores', config.professores, 'professores');
-  renderConfigList('list-config-salas', config.salas, 'salas');
 }
 
 function renderConfigList(elementId, dataList, type) {
   const list = document.getElementById(elementId);
-  if (!list) return;
   list.innerHTML = dataList.map((item, i) => `
-    <div class="config-chip">
+    <li class="pending-item">
       <span>${item}</span>
-      <button onclick="removeConfigItem('${type}', ${i})">&times;</button>
-    </div>
+      <button class="item-remove" onclick="removeConfigItem('${type}', ${i})">&#10005;</button>
+    </li>
   `).join('');
 }
 
@@ -916,48 +909,26 @@ window.removeConfigItem = function(type, index) {
   updateSelects();
 };
 
-// Usando um método de escuta global para evitar problemas de ID
-document.addEventListener('click', (e) => {
-  // Busca o ID do botão ou do pai (caso clique no texto "+" dentro do botão)
-  const btn = e.target.closest('button');
-  if (!btn || !btn.id) return;
-  const targetId = btn.id;
+document.getElementById('btn-add-marca').onclick = () => addConfigItem('input-config-marca', 'marcas');
+document.getElementById('btn-add-modelo').onclick = () => addConfigItem('input-config-modelo', 'modelos');
+document.getElementById('btn-add-professor').onclick = () => addConfigItem('input-config-professor', 'professores');
 
-  if (targetId === 'btn-add-marca')     addConfigItemDirect('input-config-marca', 'marcas');
-  if (targetId === 'btn-add-modelo')    addConfigItemDirect('input-config-modelo', 'modelos');
-  if (targetId === 'btn-add-professor') addConfigItemDirect('input-config-professor', 'professores');
-  if (targetId === 'btn-add-sala')      addConfigItemDirect('input-config-sala', 'salas');
-});
-
-function addConfigItemDirect(inputId, type) {
+function addConfigItem(inputId, type) {
   const input = document.getElementById(inputId);
-  if (!input) return;
   const val = input.value.trim();
   if (!val) return;
-  
-  if (config[type].includes(val)) { 
-    toast('Já cadastrado.', 'warn'); 
-    return; 
-  }
-  
+  if (config[type].includes(val)) { toast('Já cadastrado.', 'warn'); return; }
   config[type].push(val);
   input.value = '';
   salvar();
   renderConfig();
   updateSelects();
-  toast('Adicionado com sucesso!', 'success');
-}
-
-// Mantenho por compatibilidade, mas a escuta global acima é o que garante o clique
-function setupConfigEvents() {
-  renderConfig();
 }
 
 function updateSelects() {
   const selMarca = document.getElementById('select-cadastro-marca');
   const selMod   = document.getElementById('select-cadastro-modelo');
   const selProf  = document.getElementById('select-emp-professor');
-  const selSala  = document.getElementById('select-emp-sala');
 
   if (selMarca) {
     selMarca.innerHTML = '<option value="">Selecione uma marca...</option>' + 
@@ -971,16 +942,11 @@ function updateSelects() {
     selProf.innerHTML = '<option value="">Selecione um professor...</option>' + 
       config.professores.map(p => `<option value="${p}">${p}</option>`).join('');
   }
-  if (selSala) {
-    selSala.innerHTML = '<option value="">Selecione a sala...</option>' + 
-      config.salas.map(s => `<option value="${s}">${s}</option>`).join('');
-  }
 }
 
 function init() {
   carregar();
   carregarDadosDemo();
-  setupConfigEvents();
   updateSelects();
   renderDashboard();
 

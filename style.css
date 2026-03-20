@@ -266,46 +266,8 @@ select option { background: var(--bg3); }
 }
 
 /* ===========================
-   CHIPS DE CONFIGURAÇÃO E LISTAS
+   PENDING LIST
 =========================== */
-.config-chip {
-  background: var(--bg3);
-  padding: 6px 14px;
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  border: 1px solid var(--border);
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: var(--text);
-  animation: fadeIn 0.3s ease-out;
-}
-
-.config-chip button {
-  background: rgba(231, 76, 60, 0.1);
-  border: none;
-  color: var(--danger);
-  font-size: 1.2rem;
-  cursor: pointer;
-  line-height: 1;
-  border-radius: 4px;
-  padding: 2px 6px;
-  transition: all 0.2s;
-}
-
-.config-chip button:hover {
-  background: var(--danger);
-  color: white;
-}
-
-.pending-list {
-  list-style: none;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  min-height: 44px;
-}
 .pending-list-wrapper {
   margin-bottom: 20px;
 }
