@@ -899,11 +899,12 @@ function renderConfig() {
 
 function renderConfigList(elementId, dataList, type) {
   const list = document.getElementById(elementId);
+  if (!list) return;
   list.innerHTML = dataList.map((item, i) => `
-    <li class="pending-item">
+    <div class="config-chip">
       <span>${item}</span>
-      <button class="item-remove" onclick="removeConfigItem('${type}', ${i})">&#10005;</button>
-    </li>
+      <button onclick="removeConfigItem('${type}', ${i})">&times;</button>
+    </div>
   `).join('');
 }
 
@@ -915,27 +916,33 @@ window.removeConfigItem = function(type, index) {
 };
 
 function setupConfigEvents() {
-  const btnMarca = document.getElementById('btn-add-marca');
-  const btnMod   = document.getElementById('btn-add-modelo');
-  const btnProf  = document.getElementById('btn-add-professor');
-  const btnSala  = document.getElementById('btn-add-sala');
+  const configs = [
+    { btn: 'btn-add-marca', input: 'input-config-marca', type: 'marcas' },
+    { btn: 'btn-add-modelo', input: 'input-config-modelo', type: 'modelos' },
+    { btn: 'btn-add-professor', input: 'input-config-professor', type: 'professores' },
+    { btn: 'btn-add-sala', input: 'input-config-sala', type: 'salas' }
+  ];
 
-  if (btnMarca) btnMarca.onclick = () => addConfigItem('input-config-marca', 'marcas');
-  if (btnMod)   btnMod.onclick   = () => addConfigItem('input-config-modelo', 'modelos');
-  if (btnProf)  btnProf.onclick  = () => addConfigItem('input-config-professor', 'professores');
-  if (btnSala)  btnSala.onclick  = () => addConfigItem('input-config-sala', 'salas');
-}
-
-function addConfigItem(inputId, type) {
-  const input = document.getElementById(inputId);
-  const val = input.value.trim();
-  if (!val) return;
-  if (config[type].includes(val)) { toast('Já cadastrado.', 'warn'); return; }
-  config[type].push(val);
-  input.value = '';
-  salvar();
-  renderConfig();
-  updateSelects();
+  configs.forEach(cfg => {
+    const btn = document.getElementById(cfg.btn);
+    if (btn) {
+      btn.onclick = () => {
+        const input = document.getElementById(cfg.input);
+        const val = input.value.trim();
+        if (!val) return;
+        if (config[cfg.type].includes(val)) { 
+          toast('Já cadastrado.', 'warn'); 
+          return; 
+        }
+        config[cfg.type].push(val);
+        input.value = '';
+        salvar();
+        renderConfig();
+        updateSelects();
+        toast('Adicionado com sucesso!', 'success');
+      };
+    }
+  });
 }
 
 function updateSelects() {
