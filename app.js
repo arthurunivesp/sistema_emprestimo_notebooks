@@ -890,6 +890,7 @@ function carregarDadosDemo() {
 
 // ─── INICIALIZAÇÃO ────────────────────────────────────────────
 // ─── CONFIGURAÇÕES ─────────────────────────────────────────────
+// ─── CONFIGURAÇÕES (REESCRITO PARA FUNCIONAR 100%) ───────────
 function renderConfig() {
   renderConfigList('list-config-marcas', config.marcas, 'marcas');
   renderConfigList('list-config-modelos', config.modelos, 'modelos');
@@ -915,34 +916,41 @@ window.removeConfigItem = function(type, index) {
   updateSelects();
 };
 
-function setupConfigEvents() {
-  const configs = [
-    { btn: 'btn-add-marca', input: 'input-config-marca', type: 'marcas' },
-    { btn: 'btn-add-modelo', input: 'input-config-modelo', type: 'modelos' },
-    { btn: 'btn-add-professor', input: 'input-config-professor', type: 'professores' },
-    { btn: 'btn-add-sala', input: 'input-config-sala', type: 'salas' }
-  ];
+// Usando um método de escuta global para evitar problemas de ID
+document.addEventListener('click', (e) => {
+  // Busca o ID do botão ou do pai (caso clique no texto "+" dentro do botão)
+  const btn = e.target.closest('button');
+  if (!btn || !btn.id) return;
+  const targetId = btn.id;
 
-  configs.forEach(cfg => {
-    const btn = document.getElementById(cfg.btn);
-    if (btn) {
-      btn.onclick = () => {
-        const input = document.getElementById(cfg.input);
-        const val = input.value.trim();
-        if (!val) return;
-        if (config[cfg.type].includes(val)) { 
-          toast('Já cadastrado.', 'warn'); 
-          return; 
-        }
-        config[cfg.type].push(val);
-        input.value = '';
-        salvar();
-        renderConfig();
-        updateSelects();
-        toast('Adicionado com sucesso!', 'success');
-      };
-    }
-  });
+  if (targetId === 'btn-add-marca')     addConfigItemDirect('input-config-marca', 'marcas');
+  if (targetId === 'btn-add-modelo')    addConfigItemDirect('input-config-modelo', 'modelos');
+  if (targetId === 'btn-add-professor') addConfigItemDirect('input-config-professor', 'professores');
+  if (targetId === 'btn-add-sala')      addConfigItemDirect('input-config-sala', 'salas');
+});
+
+function addConfigItemDirect(inputId, type) {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+  const val = input.value.trim();
+  if (!val) return;
+  
+  if (config[type].includes(val)) { 
+    toast('Já cadastrado.', 'warn'); 
+    return; 
+  }
+  
+  config[type].push(val);
+  input.value = '';
+  salvar();
+  renderConfig();
+  updateSelects();
+  toast('Adicionado com sucesso!', 'success');
+}
+
+// Mantenho por compatibilidade, mas a escuta global acima é o que garante o clique
+function setupConfigEvents() {
+  renderConfig();
 }
 
 function updateSelects() {
