@@ -127,7 +127,10 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     if (btn.dataset.tab === 'estoque')   renderEstoque();
     if (btn.dataset.tab === 'historico') renderHistorico();
     if (btn.dataset.tab === 'dashboard') renderDashboard();
-    if (btn.dataset.tab === 'config')    renderConfig();
+    if (btn.dataset.tab === 'config') {
+      renderConfig();
+      setupConfigEvents();
+    }
     if (btn.dataset.tab === 'cadastro' || btn.dataset.tab === 'emprestimo') updateSelects();
   });
 });
@@ -911,10 +914,17 @@ window.removeConfigItem = function(type, index) {
   updateSelects();
 };
 
-document.getElementById('btn-add-marca').onclick = () => addConfigItem('input-config-marca', 'marcas');
-document.getElementById('btn-add-modelo').onclick = () => addConfigItem('input-config-modelo', 'modelos');
-document.getElementById('btn-add-professor').onclick = () => addConfigItem('input-config-professor', 'professores');
-document.getElementById('btn-add-sala').onclick = () => addConfigItem('input-config-sala', 'salas');
+function setupConfigEvents() {
+  const btnMarca = document.getElementById('btn-add-marca');
+  const btnMod   = document.getElementById('btn-add-modelo');
+  const btnProf  = document.getElementById('btn-add-professor');
+  const btnSala  = document.getElementById('btn-add-sala');
+
+  if (btnMarca) btnMarca.onclick = () => addConfigItem('input-config-marca', 'marcas');
+  if (btnMod)   btnMod.onclick   = () => addConfigItem('input-config-modelo', 'modelos');
+  if (btnProf)  btnProf.onclick  = () => addConfigItem('input-config-professor', 'professores');
+  if (btnSala)  btnSala.onclick  = () => addConfigItem('input-config-sala', 'salas');
+}
 
 function addConfigItem(inputId, type) {
   const input = document.getElementById(inputId);
@@ -955,6 +965,7 @@ function updateSelects() {
 function init() {
   carregar();
   carregarDadosDemo();
+  setupConfigEvents();
   updateSelects();
   renderDashboard();
 
