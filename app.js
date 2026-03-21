@@ -46,6 +46,23 @@ function carregar() {
     const savedConfig = JSON.parse(localStorage.getItem(DB_KEY_CONFIG));
     if (savedConfig) config = savedConfig;
   } catch { /* mantém config padrão */ }
+  
+  // AUTO-CORRECAO: Sincronizar estado ao carregar
+  sincronizarEstado();
+}
+
+// --- AUTO-CORRECAO DE INCONSISTENCIAS ---
+function sincronizarEstado() {
+  // Se um notebook esta "emprestado" mas nao tem agendamento "em_uso" que o contenha, devolve ao estoque
+  notebooks.forEach(nb => {
+    if (nb.status === 'emprestado') {
+      const temAgendamento = agendamentos.some(a => a.status === 'em_uso' && a.seriais.includes(nb.serial));
+      if (!temAgendamento) {
+        nb.status = 'disponivel';
+      }
+    }
+  });
+  salvar();
 }
 
 // ─── UTILITÁRIOS ──────────────────────────────────────────────
@@ -169,24 +186,9 @@ function verificarAlertas() {
         salvar();
       }
 
-      // Transição automática de status
-      if (agora >= dataRetirada && agora < dataDevolucao) {
-        agend.status = 'em_uso';
-        agend.retiradoEm = agend.retiradoEm || agora.toISOString();
-        agend.seriais.forEach(serial => {
-          const nb = getNotebook(serial);
-          if (nb && nb.status === 'disponivel') nb.status = 'emprestado';
-        });
-        salvar();
-      } else if (agora >= dataDevolucao) {
-        agend.status = 'devolvido';
-        agend.devolvidoEm = agend.devolvidoEm || agora.toISOString();
-        agend.seriais.forEach(serial => {
-          const nb = getNotebook(serial);
-          if (nb && nb.status === 'emprestado') nb.status = 'disponivel';
-        });
-        salvar();
-      }
+      // NOTA: Transição de status é feita manualmente na aba de Empréstimo
+      // Não fazemos transição automática para evitar inconsistências
+      // O usuário deve confirmar a retirada manualmente clicando em "Concluir Retirada"
     }
   });
 
@@ -210,6 +212,61 @@ function renderizarAlertas(alertas) {
       <strong>${alerta.mensagem}</strong>
     </div>
   `).join('');
+}
+
+function renderEventosCriticos() {
+  const container = document.getElementById('critical-events-container');
+  if (!container) return;
+  const agora = new Date();
+  const eventos = [];
+  agendamentos.forEach(agend => {
+    if (agend.status === 'em_uso') {
+      const [hDev, mDev] = agend.horaDevolucao.split(':').map(Number);
+      const dataDevolucao = new Date(agend.data + 'T00:00:00');
+      dataDevolucao.setHours(hDev, mDev, 0, 0);
+      const diffDevolucao = Math.floor((dataDevolucao - agora) / 60000);
+      if (diffDevolucao > 0 && diffDevolucao <= 8) {
+        eventos.push({
+          tipo: 'devolucao',
+          urgencia: diffDevolucao <= 2 ? 'critica' : (diffDevolucao <= 5 ? 'alta' : 'normal'),
+          tempo: diffDevolucao,
+          mensagem: `Recolher equipamentos de ${agend.professor} (${agend.setor}) em ${diffDevolucao} min`,
+          hora: agend.horaDevolucao
+        });
+      }
+    }
+  });
+  agendamentos.forEach(agend => {
+    if (agend.status === 'agendado') {
+      const [hRet, mRet] = agend.horaRetirada.split(':').map(Number);
+      const dataRetirada = new Date(agend.data + 'T00:00:00');
+      dataRetirada.setHours(hRet, mRet, 0, 0);
+      const diffRetirada = Math.floor((dataRetirada - agora) / 60000);
+      if (diffRetirada > 0 && diffRetirada <= 5) {
+        eventos.push({
+          tipo: 'retirada',
+          urgencia: diffRetirada <= 2 ? 'critica' : 'alta',
+          tempo: diffRetirada,
+          mensagem: `Preparar equipamentos para ${agend.professor} (${agend.setor}) em ${diffRetirada} min`,
+          hora: agend.horaRetirada
+        });
+      }
+    }
+  });
+  eventos.sort((a, b) => {
+    const urgenciaMap = { critica: 0, alta: 1, normal: 2 };
+    const diffUrgencia = urgenciaMap[a.urgencia] - urgenciaMap[b.urgencia];
+    return diffUrgencia !== 0 ? diffUrgencia : a.tempo - b.tempo;
+  });
+  if (eventos.length === 0) {
+    container.innerHTML = '<p style="color: var(--text2); font-size: 0.9rem; text-align: center; padding: 20px;">Nenhum evento critico no momento.</p>';
+    return;
+  }
+  container.innerHTML = eventos.map(evt => {
+    const iconMap = { devolucao: '↩️', retirada: '➡️' };
+    const borderColor = evt.urgencia === 'critica' ? '#ff4444' : (evt.urgencia === 'alta' ? '#ffaa00' : '#4488ff');
+    return `<div style="padding: 12px; border-radius: 6px; border-left: 4px solid ${borderColor}; display: flex; justify-content: space-between; align-items: center; background: var(--bg2);"><div style="flex: 1;"><div style="font-size: 0.9rem; font-weight: 600; color: var(--text);">${iconMap[evt.tipo]} ${evt.mensagem}</div><div style="font-size: 0.8rem; color: var(--text2); margin-top: 4px;">Horário: ${evt.hora}</div></div><div style="font-size: 1.2rem; font-weight: bold; color: var(--text); min-width: 50px; text-align: right;">${evt.tempo}m</div></div>`;
+  }).join('');
 }
 
 function renderEquipamentosEmUso() {
@@ -242,7 +299,9 @@ function renderDashboard() {
   });
 
   document.getElementById('count-disponivel').textContent = counts.disponivel;
-  document.getElementById('count-emprestado').textContent = counts.emprestado;
+  // "Em Uso" = quantidade de agendamentos com status 'em_uso'
+  const emUsoCount = agendamentos.filter(a => a.status === 'em_uso').length;
+  document.getElementById('count-emprestado').textContent = emUsoCount;
   document.getElementById('count-manutencao').textContent = counts.manutencao;
   document.getElementById('count-reparo').textContent     = counts.reparo;
   document.getElementById('count-total').textContent      = notebooks.length;
@@ -270,6 +329,7 @@ function renderDashboard() {
   }
 
   verificarAlertas();
+  renderEventosCriticos();
 }
 
 // ─── CADASTRO ─────────────────────────────────────────────────
@@ -414,6 +474,25 @@ function adicionarPendingAgendamento() {
   inputAgendSerial.focus();
 }
 
+// AGENDAMENTO POR QUANTIDADE
+const btnAdicionarQtd = document.getElementById('btn-adicionar-agend-sem-serial');
+if (btnAdicionarQtd) {
+  btnAdicionarQtd.addEventListener('click', () => {
+    const inputQtd = document.getElementById('input-agend-qtd-equipamentos');
+    const qtd = parseInt(inputQtd.value) || 0;
+    if (qtd <= 0) { toast('Informe uma quantidade valida (1 a 20).', 'warn'); return; }
+    const disponiveis = notebooks.filter(n => n.status === 'disponivel').length;
+    if (qtd > disponiveis) { toast(`Quantidade indisponivel! Temos apenas ${disponiveis} notebook(s) disponivel(is).`, 'error'); return; }
+    pendingAgendamento = [];
+    for (let i = 1; i <= qtd; i++) {
+      pendingAgendamento.push(`[PENDENTE_${i}]`);
+    }
+    renderPendingAgendamento();
+    inputQtd.value = '';
+    toast(`${qtd} notebook(s) reservado(s). Seriais serao definidos na retirada.`, 'success');
+  });
+}
+
 function renderPendingAgendamento() {
   const list  = document.getElementById('list-agend-pack');
   const badge = document.getElementById('badge-agend');
@@ -422,7 +501,8 @@ function renderPendingAgendamento() {
   if (pendingAgendamento.length === 0) { list.innerHTML = ''; return; }
 
   list.innerHTML = pendingAgendamento.map((s, i) => {
-    const nb = getNotebook(s);
+    const isPendente = s.includes("PENDENTE");
+    const nb = isPendente ? null : getNotebook(s);
     return `
       <li class="pending-item status-ok">
         <span class="item-serial">${s}</span>
@@ -594,16 +674,26 @@ function confirmarEmprestimoAgendado(agendId) {
   if (!agend) { toast('Agendamento não encontrado.', 'error'); return; }
   if (agend.status !== 'agendado') { toast('Este agendamento não está mais disponível.', 'warn'); return; }
 
+  const seriaisConfirmados = agend.seriais.filter(s => !s.includes('PENDENTE'));
+  const seriaisPendentes = agend.seriais.filter(s => s.includes('PENDENTE'));
+
+  if (seriaisPendentes.length > 0) {
+    toast(`ATENCAO: ${seriaisPendentes.length} equipamento(s) pendente(s)! Leia os codigos de barras.`, 'error');
+    document.getElementById('container-retirada-seriais').style.display = 'block';
+    document.getElementById('label-qtd-necessaria').textContent = seriaisPendentes.length;
+    document.getElementById('label-qtd-lidos').textContent = '0';
+    document.getElementById('input-retirada-serial').focus();
+    return;
+  }
+
   agend.status     = 'em_uso';
   agend.retiradoEm = new Date().toISOString();
-
-  agend.seriais.forEach(serial => {
+  seriaisConfirmados.forEach(serial => {
     const nb = getNotebook(serial);
-    if (nb) nb.status = 'emprestado';
+    if (nb && nb.status === 'disponivel') nb.status = 'emprestado';
   });
-
   salvar();
-  toast(`Empréstimo confirmado! ${agend.seriais.length} notebook(s) retirados por ${agend.professor}`, 'success');
+  toast(`Emprestimo confirmado! ${seriaisConfirmados.length} notebook(s) retirados por ${agend.professor}`, 'success');
   renderEmprestimos();
   renderAgendamentos();
   renderDashboard();
@@ -1216,3 +1306,41 @@ function init() {
 }
 
 init();
+
+// --- EDICAO E CANCELAMENTO DE AGENDAMENTOS ---
+function editarAgendamento(agendId) {
+  const agend = getAgendamento(agendId);
+  if (!agend) { toast('Agendamento nao encontrado.', 'error'); return; }
+  
+  document.getElementById('select-agend-professor').value = agend.professor;
+  document.getElementById('input-agend-setor').value = agend.setor;
+  document.getElementById('input-agend-data').value = agend.data;
+  document.getElementById('input-agend-hora-retirada').value = agend.horaRetirada;
+  document.getElementById('input-agend-hora-devolucao').value = agend.horaDevolucao;
+  document.getElementById('input-agend-obs').value = agend.obs;
+  
+  pendingAgendamento = [...agend.seriais];
+  renderPendingAgendamento();
+  
+  const btnConfirmar = document.getElementById('btn-confirmar-agendamento');
+  btnConfirmar.textContent = '✓ Atualizar Agendamento';
+  btnConfirmar.dataset.editId = agendId;
+  
+  document.getElementById('tab-agendamento').scrollIntoView({ behavior: 'smooth' });
+  toast('Agendamento carregado para edicao.', 'info');
+}
+
+function cancelarAgendamento(agendId) {
+  const agend = getAgendamento(agendId);
+  if (!agend) { toast('Agendamento nao encontrado.', 'error'); return; }
+  
+  if (!confirm(`Cancelar agendamento de ${agend.professor} na sala ${agend.setor}?`)) return;
+  
+  agendamentos = agendamentos.filter(a => a.id !== agendId);
+  salvar();
+  
+  toast('Agendamento cancelado.', 'success');
+  renderAgendamentos();
+  renderEmprestimos();
+  renderDashboard();
+}

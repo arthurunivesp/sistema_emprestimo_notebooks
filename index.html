@@ -78,7 +78,16 @@
       </div>
 
       <!-- ALERTAS -->
-      <div id="alerts-container" style="margin-top: 30px;"></div>
+
+      <!-- PROXIMOS EVENTOS CRITICOS -->
+      <div style="margin-top: 30px; padding: 20px; background: var(--bg3); border-radius: 8px; border-left: 4px solid var(--warning);">
+        <h3 style="font-size: 1rem; margin-bottom: 15px; color: var(--text); display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 1.2rem;">⏰</span> Proximos Eventos Criticos
+        </h3>
+        <div id="critical-events-container" style="display: grid; gap: 12px;">
+          <p style="color: var(--text2); font-size: 0.9rem; text-align: center; padding: 20px;">Nenhum evento critico no momento.</p>
+        </div>
+      </div>
 
       <!-- EQUIPAMENTOS EM USO -->
       <div style="margin-top: 30px;">
@@ -223,6 +232,15 @@
         </div>
 
         <!-- Área de leitura de serial para agendamento -->
+        <!-- Opcao 2: Agendamento sem Serial (a definir na retirada) -->
+        <div style="background: var(--bg3); padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid var(--border);">
+          <div style="font-size: 0.9rem; font-weight: 600; color: var(--text); margin-bottom: 12px;">OPCAO 2: Sem Equipamento (Definir na Retirada)</div>
+          <div style="display: flex; gap: 10px; align-items: center;">
+            <input type="number" id="input-agend-qtd-equipamentos" placeholder="Quantidade de equipamentos" min="1" max="20" style="flex: 1; padding: 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg2); color: var(--text);" />
+            <button class="btn btn-warning" id="btn-adicionar-agend-sem-serial" style="white-space: nowrap;">+ Adicionar Quantidade</button>
+          </div>
+          <p class="hint" style="margin-top: 8px; color: var(--warning);">Os equipamentos serao definidos no momento da retirada via leitura de codigo de barras.</p>
+        </div>
         <div class="scan-area">
           <label>&#128269; Adicionar Notebook ao Agendamento</label>
           <div class="scan-row">
@@ -281,6 +299,25 @@
     <!-- ===================== EMPRÉSTIMO ===================== -->
     <section id="tab-emprestimo" class="tab-content">
       <h2 class="section-title">Empréstimo de Equipamentos</h2>
+
+      <!-- LEITURA DE SERIAIS PARA AGENDAMENTOS POR QUANTIDADE -->
+      <div id="container-retirada-seriais" style="display: none; background: var(--bg2); padding: 20px; border-radius: 8px; margin-bottom: 30px; border-left: 4px solid var(--success);">
+        <h3 style="font-size: 1rem; margin-bottom: 12px; color: var(--text);">🔍 Leitura de Códigos de Barras para Retirada</h3>
+        <p style="color: var(--text2); margin-bottom: 15px; font-size: 0.9rem;">
+          Este agendamento foi criado <strong>por quantidade</strong>. Leia os códigos de barras dos notebooks que serão emprestados.
+        </p>
+        <div class="scan-row" style="margin-bottom: 15px;">
+          <input type="text" id="input-retirada-serial" placeholder="Leia o código de barras ou digite o serial..." autocomplete="off" />
+          <button class="btn btn-primary" id="btn-adicionar-retirada">+ Adicionar</button>
+        </div>
+        <p style="color: var(--text2); font-size: 0.85rem; margin-bottom: 15px;">
+          Quantidade necessária: <strong id="label-qtd-necessaria">0</strong> | Já lidos: <strong id="label-qtd-lidos">0</strong>
+        </p>
+        <div id="container-seriais-retirada" style="background: var(--bg3); padding: 12px; border-radius: 6px; margin-bottom: 15px; min-height: 40px; max-height: 150px; overflow-y: auto;">
+          <p style="color: var(--text2); font-size: 0.9rem; text-align: center;">Nenhum serial lido ainda.</p>
+        </div>
+        <button class="btn btn-success" id="btn-confirmar-retirada-com-seriais" style="width: 100%;">✓ Confirmar Retirada com Seriais</button>
+      </div>
 
       <!-- PRÓXIMOS EMPRÉSTIMOS -->
       <div style="margin-bottom: 40px;">
