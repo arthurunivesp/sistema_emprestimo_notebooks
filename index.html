@@ -23,6 +23,7 @@
       <nav class="tabs">
         <button class="tab-btn active" data-tab="dashboard">Dashboard</button>
         <button class="tab-btn" data-tab="cadastro">Cadastrar</button>
+        <button class="tab-btn" data-tab="agendamento">Agendamento</button>
         <button class="tab-btn" data-tab="emprestimo">Empréstimo</button>
         <button class="tab-btn" data-tab="devolucao">Devolução</button>
         <button class="tab-btn" data-tab="estoque">Estoque</button>
@@ -47,53 +48,75 @@
           </div>
         </div>
         <div class="card card-emprestado">
-          <div class="card-icon">&#128203;</div>
+          <div class="card-icon">&#128231;</div>
           <div class="card-info">
-            <span class="card-label">Emprestados</span>
+            <span class="card-label">Em Uso</span>
             <span class="card-value" id="count-emprestado">0</span>
           </div>
         </div>
         <div class="card card-manutencao">
           <div class="card-icon">&#128295;</div>
           <div class="card-info">
-            <span class="card-label">Em Manutenção</span>
+            <span class="card-label">Manutenção</span>
             <span class="card-value" id="count-manutencao">0</span>
           </div>
         </div>
         <div class="card card-reparo">
           <div class="card-icon">&#128736;</div>
           <div class="card-info">
-            <span class="card-label">Reparo Profissional</span>
+            <span class="card-label">Reparo</span>
             <span class="card-value" id="count-reparo">0</span>
           </div>
         </div>
         <div class="card card-total">
           <div class="card-icon">&#128187;</div>
           <div class="card-info">
-            <span class="card-label">Total Cadastrado</span>
+            <span class="card-label">Total</span>
             <span class="card-value" id="count-total">0</span>
           </div>
         </div>
       </div>
 
-      <div class="dashboard-bottom">
-        <div class="dash-section">
-          <h3>Últimos Empréstimos</h3>
-          <table class="data-table" id="table-ultimos-emprestimos">
-            <thead>
-              <tr>
-                <th>Pack</th>
-                <th>Responsável</th>
-                <th>Qtd.</th>
-                <th>Data/Hora</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody id="tbody-ultimos-emprestimos">
-              <tr><td colspan="5" class="empty-row">Nenhum empréstimo registrado.</td></tr>
-            </tbody>
-          </table>
-        </div>
+      <!-- ALERTAS -->
+      <div id="alerts-container" style="margin-top: 30px;"></div>
+
+      <!-- EQUIPAMENTOS EM USO -->
+      <div style="margin-top: 30px;">
+        <h3 style="font-size: 1.1rem; margin-bottom: 20px; color: var(--text);">Equipamentos em Uso</h3>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Professor</th>
+              <th>Sala</th>
+              <th>Notebooks</th>
+              <th>Retirada</th>
+              <th>Devolução</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-em-uso">
+            <tr><td colspan="6" class="empty-row">Nenhum equipamento em uso.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ÚLTIMOS EMPRÉSTIMOS -->
+      <div style="margin-top: 30px;">
+        <h3 style="font-size: 1.1rem; margin-bottom: 20px; color: var(--text);">Últimos Empréstimos</h3>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Professor</th>
+              <th>Notebooks</th>
+              <th>Data/Retirada</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-ultimos-emprestimos">
+            <tr><td colspan="5" class="empty-row">Nenhum empréstimo registrado.</td></tr>
+          </tbody>
+        </table>
       </div>
     </section>
 
@@ -101,23 +124,25 @@
     <section id="tab-cadastro" class="tab-content">
       <h2 class="section-title">Cadastrar Notebook</h2>
       <div class="form-card">
+
+        <!-- Área de leitura de serial -->
         <div class="scan-area">
-          <label for="input-cadastro-serial">Número de Série (leia o código de barras ou digite)</label>
+          <label>&#128269; Nº Série / Código de Barras</label>
           <div class="scan-row">
-            <input
-              type="text"
-              id="input-cadastro-serial"
-              placeholder="Ex: NB-2024-001234"
-              autocomplete="off"
-              autofocus
-            />
+            <input type="text" id="input-cadastro-serial"
+              placeholder="Leia o código de barras ou digite o serial..."
+              autocomplete="off" />
             <button class="btn btn-primary" id="btn-adicionar-serial">+ Adicionar</button>
           </div>
-          <p class="hint">Posicione o cursor no campo e leia o código de barras com o leitor. O notebook será adicionado automaticamente.</p>
+          <p class="hint">Pressione Enter ou clique em "+ Adicionar" para incluir o serial na lista abaixo.</p>
         </div>
 
+        <!-- Lista de seriais pendentes -->
         <div class="pending-list-wrapper">
-          <h3>Notebooks a cadastrar <span id="badge-pending" class="badge">0</span></h3>
+          <h3>
+            Seriais para Cadastro
+            <span class="badge" id="badge-pending">0</span>
+          </h3>
           <ul id="list-pending-cadastro" class="pending-list"></ul>
         </div>
 
@@ -134,13 +159,13 @@
               <option value="">Selecione um modelo...</option>
             </select>
           </div>
-          <div class="form-group">
-            <label for="input-cadastro-patrimonio">Nº Patrimônio (opcional)</label>
-            <input type="text" id="input-cadastro-patrimonio" placeholder="Ex: PAT-00123" />
-          </div>
         </div>
 
         <div class="form-row">
+          <div class="form-group">
+            <label for="input-cadastro-patrimonio">Patrimônio (Opcional)</label>
+            <input type="text" id="input-cadastro-patrimonio" placeholder="Ex: PAT-2024-001" />
+          </div>
           <div class="form-group">
             <label for="select-cadastro-status">Status Inicial</label>
             <select id="select-cadastro-status">
@@ -149,147 +174,328 @@
               <option value="reparo">Reparo Profissional</option>
             </select>
           </div>
+        </div>
+
+        <div class="form-row">
           <div class="form-group">
             <label for="input-cadastro-obs">Observações</label>
-            <input type="text" id="input-cadastro-obs" placeholder="Observações gerais" />
+            <input type="text" id="input-cadastro-obs" placeholder="Ex: Sem bateria, teclado com defeito..." />
           </div>
         </div>
 
         <div class="btn-row">
           <button class="btn btn-success" id="btn-confirmar-cadastro">&#10003; Confirmar Cadastro</button>
-          <button class="btn btn-danger" id="btn-limpar-cadastro">&#10005; Limpar</button>
+          <button class="btn btn-secondary" id="btn-limpar-cadastro">Limpar</button>
         </div>
+      </div>
+    </section>
+
+    <!-- ===================== AGENDAMENTO ===================== -->
+    <section id="tab-agendamento" class="tab-content">
+      <h2 class="section-title">Agendar Empréstimo</h2>
+      <div class="form-card">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="select-agend-professor">Professor</label>
+            <select id="select-agend-professor">
+              <option value="">Selecione o professor...</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="input-agend-setor">Sala/Setor</label>
+            <input type="text" id="input-agend-setor" placeholder="Ex: Sala 101, Lab Info" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="input-agend-data">Data</label>
+            <input type="date" id="input-agend-data" />
+          </div>
+          <div class="form-group">
+            <label for="input-agend-hora-retirada">Horário Retirada</label>
+            <input type="time" id="input-agend-hora-retirada" />
+          </div>
+          <div class="form-group">
+            <label for="input-agend-hora-devolucao">Horário Devolução</label>
+            <input type="time" id="input-agend-hora-devolucao" />
+          </div>
+        </div>
+
+        <!-- Área de leitura de serial para agendamento -->
+        <div class="scan-area">
+          <label>&#128269; Adicionar Notebook ao Agendamento</label>
+          <div class="scan-row">
+            <input type="text" id="input-agend-serial"
+              placeholder="Leia o código de barras ou digite o serial..."
+              autocomplete="off" />
+            <button class="btn btn-primary" id="btn-adicionar-agend">+ Adicionar</button>
+          </div>
+          <p class="hint">Pressione Enter ou clique em "+ Adicionar" para incluir o notebook na lista abaixo.</p>
+        </div>
+
+        <!-- Lista de notebooks pendentes do agendamento -->
+        <div class="pending-list-wrapper">
+          <h3>
+            Notebooks do Agendamento
+            <span class="badge" id="badge-agend">0</span>
+          </h3>
+          <ul id="list-agend-pack" class="pending-list"></ul>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="input-agend-obs">Observações</label>
+            <input type="text" id="input-agend-obs" placeholder="Observações adicionais..." />
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-success" id="btn-confirmar-agendamento">+ Criar Agendamento</button>
+          <button class="btn btn-secondary" id="btn-limpar-agendamento">Cancelar</button>
+        </div>
+      </div>
+
+      <div style="margin-top: 40px;">
+        <h3 style="font-size: 1.1rem; margin-bottom: 20px; color: var(--text2);">Agendamentos</h3>
+        <table class="data-table" id="table-agendamentos">
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Professor</th>
+              <th>Sala/Setor</th>
+              <th>Retirada</th>
+              <th>Devolução</th>
+              <th>Notebooks</th>
+              <th>Status</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-agendamentos">
+            <tr><td colspan="8" class="empty-row">Nenhum agendamento registrado.</td></tr>
+          </tbody>
+        </table>
       </div>
     </section>
 
     <!-- ===================== EMPRÉSTIMO ===================== -->
     <section id="tab-emprestimo" class="tab-content">
-      <h2 class="section-title">Registrar Empréstimo (Pack)</h2>
-      <div class="form-card">
-        <div class="form-row">
-          <div class="form-group">
-            <label for="select-emp-professor">Professor Responsável</label>
-            <select id="select-emp-professor">
-              <option value="">Selecione um professor...</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="input-emp-setor">Setor / Turma</label>
-            <input type="text" id="input-emp-setor" placeholder="Ex: Turma A / TI" />
-          </div>
-        </div>
-        <div class="form-row" style="background: rgba(231,76,60,0.1); padding: 15px; border-radius: 8px; border: 1px solid var(--danger); margin-bottom: 20px;">
-          <div class="form-group" style="flex-direction: row; align-items: center; gap: 15px;">
-            <input type="checkbox" id="check-emp-emergencial" style="width: 24px; height: 24px; cursor: pointer;" />
-            <label for="check-emp-emergencial" style="color: var(--danger); font-weight: 800; font-size: 1.1rem; cursor: pointer;">
-              ⚠️ EMPRÉSTIMO EMERGENCIAL (Autorizado pela Coordenação)
-            </label>
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label for="input-emp-obs">Observações do Empréstimo</label>
-            <input type="text" id="input-emp-obs" placeholder="Finalidade, evento, etc." />
-          </div>
-          <div class="form-group">
-            <label for="input-emp-previsao">Previsão de Devolução (Data)</label>
-            <input type="date" id="input-emp-previsao" />
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label for="input-emp-hora-retirada">Horário Agendado para Retirada</label>
-            <input type="time" id="input-emp-hora-retirada" />
-          </div>
-          <div class="form-group">
-            <label for="input-emp-hora-devolucao">Horário Limite para Devolução</label>
-            <input type="time" id="input-emp-hora-devolucao" />
-          </div>
-        </div>
+      <h2 class="section-title">Empréstimo de Equipamentos</h2>
 
-        <div class="scan-area">
-          <label for="input-emp-serial">Leia o código de barras do notebook</label>
+      <!-- PRÓXIMOS EMPRÉSTIMOS -->
+      <div style="margin-bottom: 40px;">
+        <h3 style="font-size: 1.1rem; margin-bottom: 15px; color: var(--text);">Próximos Empréstimos (Agendados)</h3>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Professor</th>
+              <th>Sala</th>
+              <th>Retirada</th>
+              <th>Devolução</th>
+              <th>Notebooks</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-proximos-emprestimos">
+            <tr><td colspan="7" class="empty-row">Nenhum agendamento para os próximos dias.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- EMPRÉSTIMOS ATIVOS -->
+      <div style="margin-bottom: 40px;">
+        <h3 style="font-size: 1.1rem; margin-bottom: 15px; color: var(--text);">Empréstimos Ativos (Em Uso)</h3>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Professor</th>
+              <th>Sala</th>
+              <th>Retirada</th>
+              <th>Devolução</th>
+              <th>Notebooks</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-emprestimos-ativos">
+            <tr><td colspan="7" class="empty-row">Nenhum empréstimo ativo no momento.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- TROCA DE EQUIPAMENTO -->
+      <div style="background: var(--bg2); padding: 24px; border-radius: 8px; border-left: 4px solid var(--warning);">
+        <h3 style="font-size: 1.1rem; margin-bottom: 12px; color: var(--text);">Troca de Equipamento (Durante Empréstimo)</h3>
+        <p style="color: var(--text2); margin-bottom: 20px; font-style: italic;">
+          &#128260; Registre equipamentos defeituosos e selecione a reposição disponível.
+        </p>
+
+        <!-- PASSO 1: Leitura do notebook defeituoso -->
+        <div class="scan-area" style="border-color: var(--danger);">
+          <label style="color: var(--danger);">&#128269; PASSO 1 — Notebook Defeituoso</label>
           <div class="scan-row">
-            <input
-              type="text"
-              id="input-emp-serial"
-              placeholder="Aguardando leitura..."
-              autocomplete="off"
-            />
-            <button class="btn btn-primary" id="btn-adicionar-emp">+ Adicionar</button>
+            <input type="text" id="input-troca-defeituoso"
+              placeholder="Leia o código de barras ou digite o serial do notebook defeituoso..."
+              autocomplete="off" />
+            <button class="btn btn-danger" id="btn-adicionar-defeituoso">+ Adicionar</button>
           </div>
-          <p class="hint">Leia os notebooks um a um. Apenas notebooks com status "Disponível" serão aceitos.</p>
+          <p class="hint">Pressione Enter ou clique em "+ Adicionar" para identificar o notebook defeituoso.</p>
         </div>
 
-        <div class="pending-list-wrapper">
-          <h3>Notebooks no Pack <span id="badge-emp" class="badge">0</span></h3>
-          <ul id="list-emp-pack" class="pending-list"></ul>
+        <!-- Info do defeituoso -->
+        <div id="troca-defeituoso-info" style="display: none; background: rgba(231,76,60,0.1); padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid var(--danger);">
+          <p><strong>Notebook Defeituoso:</strong> <span id="troca-def-serial"></span></p>
+          <p><strong>Modelo:</strong> <span id="troca-def-modelo"></span></p>
+          <p><strong>Agendamento:</strong> <span id="troca-def-agend"></span></p>
+          <p><strong>Professor:</strong> <span id="troca-def-prof"></span></p>
+          <div class="btn-row" style="margin-top: 15px;">
+            <button class="btn btn-primary" id="btn-listar-reposicoes">&#128270; Ver Disponíveis para Reposição</button>
+            <button class="btn btn-secondary" id="btn-cancelar-defeituoso">Cancelar</button>
+          </div>
         </div>
 
-        <div class="btn-row">
-          <button class="btn btn-success" id="btn-confirmar-emprestimo">&#128203; Confirmar Empréstimo</button>
-          <button class="btn btn-danger" id="btn-limpar-emprestimo">&#10005; Limpar</button>
+        <!-- PASSO 2: Lista de equipamentos disponíveis para reposição -->
+        <div id="troca-lista-reposicoes" style="display: none; margin-bottom: 20px;">
+          <h4 style="color: var(--text); margin-bottom: 15px; font-size: 0.95rem;">
+            &#128260; PASSO 2 — Selecione o Equipamento de Reposição
+          </h4>
+          <div id="lista-equipamentos-disponiveis"
+            style="background: var(--bg3); border-radius: 8px; max-height: 400px; overflow-y: auto; border: 1px solid var(--border);">
+            <p style="padding: 20px; color: var(--text2); text-align: center;">Carregando equipamentos...</p>
+          </div>
         </div>
+
+        <!-- PASSO 3: Confirmação da troca -->
+        <div id="troca-selecao" style="display: none;">
+          <div id="troca-reposicao-info"
+            style="background: rgba(46,204,113,0.1); padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid var(--success);">
+            <p><strong>&#10003; Notebook de Reposição Selecionado:</strong> <span id="troca-rep-serial"></span></p>
+            <p><strong>Modelo:</strong> <span id="troca-rep-modelo"></span></p>
+            <p><strong>Patrimônio:</strong> <span id="troca-rep-patrimonio"></span></p>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="input-troca-motivo">&#128221; PASSO 3 — Motivo da Troca</label>
+              <input type="text" id="input-troca-motivo"
+                placeholder="Ex: Tela com defeito, bateria não carrega..." />
+            </div>
+          </div>
+
+          <div class="btn-row">
+            <button class="btn btn-success" id="btn-confirmar-troca">&#10003; Confirmar Troca</button>
+            <button class="btn btn-secondary" id="btn-voltar-reposicao">&#8592; Voltar</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- HISTÓRICO DE TROCAS -->
+      <div style="margin-top: 40px;">
+        <h3 style="font-size: 1.1rem; margin-bottom: 20px; color: var(--text2);">Histórico de Trocas</h3>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Data/Hora</th>
+              <th>Professor</th>
+              <th>Sala</th>
+              <th>Defeituoso</th>
+              <th>Reposição</th>
+              <th>Motivo</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-trocas">
+            <tr><td colspan="7" class="empty-row">Nenhuma troca registrada.</td></tr>
+          </tbody>
+        </table>
       </div>
     </section>
 
     <!-- ===================== DEVOLUÇÃO ===================== -->
     <section id="tab-devolucao" class="tab-content">
-      <h2 class="section-title">Registrar Devolução (Pack)</h2>
+      <h2 class="section-title">Devolver Equipamentos</h2>
       <div class="form-card">
+        <p style="color: var(--text2); margin-bottom: 20px; font-style: italic;">
+          Selecione um empréstimo ativo para devolução completa ou utilize a leitura individual abaixo.
+        </p>
+
+        <!-- OPÇÃO 1: Seleção de Empréstimo Completo -->
+        <div style="background: var(--bg3); padding: 20px; border-radius: 8px; margin-bottom: 24px; border: 1px solid var(--border);">
+          <div class="form-group">
+            <label for="select-dev-agendamento-ativo">Devolução por Empréstimo Ativo</label>
+            <div class="scan-row">
+              <select id="select-dev-agendamento-ativo">
+                <option value="">Selecione um empréstimo ativo...</option>
+              </select>
+              <button class="btn btn-primary" id="btn-carregar-dev-completa">Carregar Itens</button>
+            </div>
+          </div>
+          <div id="dev-agendamento-info" style="display: none; margin-top: 15px; font-size: 0.9rem; color: var(--text2);">
+            <p><strong>Professor:</strong> <span id="dev-agend-prof"></span> | <strong>Setor:</strong> <span id="dev-agend-setor"></span></p>
+          </div>
+        </div>
+
+        <div style="text-align: center; margin-bottom: 24px; color: var(--text2); font-size: 0.85rem; font-weight: 600;">
+          — OU —
+        </div>
+
+        <!-- OPÇÃO 2: Área de leitura de serial para devolução -->
+        <div class="scan-area">
+          <label>&#128269; Serial do Notebook a Devolver</label>
+          <div class="scan-row">
+            <input type="text" id="input-dev-serial"
+              placeholder="Leia o código de barras ou digite o serial..."
+              autocomplete="off" />
+            <button class="btn btn-primary" id="btn-adicionar-dev">+ Adicionar</button>
+          </div>
+          <p class="hint">Pressione Enter ou clique em "+ Adicionar" para incluir o notebook na lista de devolução.</p>
+        </div>
+
+        <!-- Lista de notebooks pendentes de devolução -->
+        <div class="pending-list-wrapper">
+          <h3>
+            Notebooks para Devolução
+            <span class="badge" id="badge-dev">0</span>
+          </h3>
+          <ul id="list-dev-pack" class="pending-list"></ul>
+        </div>
+
         <div class="form-row">
           <div class="form-group">
             <label for="input-dev-obs">Observações da Devolução</label>
-            <input type="text" id="input-dev-obs" placeholder="Condições gerais, ocorrências..." />
+            <input type="text" id="input-dev-obs" placeholder="Ex: Notebook devolvido com arranhão na tampa..." />
           </div>
-        </div>
-
-        <div class="scan-area">
-          <label for="input-dev-serial">Leia o código de barras do notebook</label>
-          <div class="scan-row">
-            <input
-              type="text"
-              id="input-dev-serial"
-              placeholder="Aguardando leitura..."
-              autocomplete="off"
-            />
-            <button class="btn btn-primary" id="btn-adicionar-dev">+ Adicionar</button>
-          </div>
-          <p class="hint">Leia os notebooks devolvidos. O sistema identificará o empréstimo automaticamente.</p>
-        </div>
-
-        <div class="pending-list-wrapper">
-          <h3>Notebooks para Devolver <span id="badge-dev" class="badge">0</span></h3>
-          <ul id="list-dev-pack" class="pending-list"></ul>
         </div>
 
         <div class="btn-row">
           <button class="btn btn-success" id="btn-confirmar-devolucao">&#10003; Confirmar Devolução</button>
-          <button class="btn btn-danger" id="btn-limpar-devolucao">&#10005; Limpar</button>
+          <button class="btn btn-secondary" id="btn-limpar-devolucao">Limpar</button>
         </div>
       </div>
     </section>
 
     <!-- ===================== ESTOQUE ===================== -->
     <section id="tab-estoque" class="tab-content">
-      <h2 class="section-title">Gerenciar Estoque</h2>
+      <h2 class="section-title">Estoque de Notebooks</h2>
 
       <div class="filter-bar">
-        <input type="text" id="input-filtro-estoque" placeholder="&#128269; Buscar por serial, modelo ou patrimônio..." />
+        <input type="text" id="input-filtro-estoque"
+          placeholder="&#128269; Buscar por serial, modelo ou patrimônio..." />
         <select id="select-filtro-status">
-          <option value="">Todos os status</option>
+          <option value="">Todos os Status</option>
           <option value="disponivel">Disponível</option>
           <option value="emprestado">Emprestado</option>
-          <option value="manutencao">Em Manutenção</option>
-          <option value="reparo">Reparo Profissional</option>
+          <option value="manutencao">Manutenção</option>
+          <option value="reparo">Reparo</option>
         </select>
-        <button class="btn btn-secondary" id="btn-exportar-csv">&#128190; Exportar CSV</button>
+        <button class="btn btn-secondary" id="btn-exportar-csv">&#128196; Exportar CSV</button>
       </div>
 
-      <table class="data-table" id="table-estoque">
+      <table class="data-table">
         <thead>
           <tr>
-            <th>Nº Série</th>
+            <th>Serial</th>
             <th>Modelo</th>
             <th>Patrimônio</th>
             <th>Status</th>
@@ -303,11 +509,46 @@
       </table>
     </section>
 
+    <!-- ===================== HISTÓRICO ===================== -->
+    <section id="tab-historico" class="tab-content">
+      <h2 class="section-title">Histórico de Empréstimos</h2>
+
+      <div class="filter-bar">
+        <input type="text" id="input-filtro-historico"
+          placeholder="&#128269; Buscar por professor, serial ou ID..." />
+        <select id="select-filtro-historico-status">
+          <option value="">Todos</option>
+          <option value="agendado">Agendados</option>
+          <option value="em_uso">Em Uso</option>
+          <option value="devolvido">Devolvidos</option>
+        </select>
+      </div>
+
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Professor</th>
+            <th>Setor</th>
+            <th>Notebooks</th>
+            <th>Data / Retirada</th>
+            <th>Limite / Devolução</th>
+            <th>Devolvido em</th>
+            <th>Status</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-historico">
+          <tr><td colspan="9" class="empty-row">Nenhum registro encontrado.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
     <!-- ===================== CONFIGURAÇÕES ===================== -->
     <section id="tab-config" class="tab-content">
       <h2 class="section-title">Configurações do Sistema</h2>
-      
-      <div class="cards-grid" style="grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));">
+
+      <div class="config-grid">
         <!-- MARCAS E MODELOS -->
         <div class="form-card">
           <h3>Marcas e Modelos</h3>
@@ -344,39 +585,6 @@
       </div>
     </section>
 
-    <!-- ===================== HISTÓRICO ===================== -->
-    <section id="tab-historico" class="tab-content">
-      <h2 class="section-title">Histórico de Empréstimos</h2>
-
-      <div class="filter-bar">
-        <input type="text" id="input-filtro-historico" placeholder="&#128269; Buscar por responsável, serial ou pack..." />
-        <select id="select-filtro-historico-status">
-          <option value="">Todos</option>
-          <option value="ativo">Ativos</option>
-          <option value="devolvido">Devolvidos</option>
-        </select>
-      </div>
-
-      <table class="data-table" id="table-historico">
-        <thead>
-          <tr>
-            <th>Pack ID</th>
-            <th>Responsável</th>
-            <th>Setor</th>
-            <th>Notebooks</th>
-            <th>Empréstimo (Retirada)</th>
-            <th>Limite (Devolução)</th>
-            <th>Devolvido em</th>
-            <th>Status</th>
-            <th>Ações</th>
-          </tr>
-        </thead>
-        <tbody id="tbody-historico">
-          <tr><td colspan="8" class="empty-row">Nenhum registro encontrado.</td></tr>
-        </tbody>
-      </table>
-    </section>
-
   </main>
 
   <!-- MODAL EDITAR NOTEBOOK -->
@@ -394,7 +602,7 @@
             <option value="reparo">Reparo Profissional</option>
           </select>
         </div>
-        <div class="form-group">
+        <div class="form-group" style="margin-top: 14px;">
           <label for="modal-obs">Observações</label>
           <input type="text" id="modal-obs" placeholder="Observações" />
         </div>
@@ -403,33 +611,6 @@
         <button class="btn btn-success" id="btn-modal-salvar">Salvar</button>
         <button class="btn btn-secondary" id="btn-modal-cancelar">Cancelar</button>
         <button class="btn btn-danger" id="btn-modal-excluir">Excluir Notebook</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL EDITAR EMPRÉSTIMO (RESETAR CRONÔMETRO) -->
-  <div id="modal-emp-overlay" class="modal-overlay hidden">
-    <div class="modal">
-      <h3>Editar Empréstimo / Resetar Tempo</h3>
-      <div class="modal-body">
-        <p><strong>Pack ID:</strong> <span id="modal-emp-id"></span></p>
-        <div class="form-group">
-          <label for="modal-emp-responsavel">Responsável</label>
-          <input type="text" id="modal-emp-responsavel" />
-        </div>
-        <div class="form-group">
-          <label for="modal-emp-data">Nova Data Limite</label>
-          <input type="date" id="modal-emp-data" />
-        </div>
-        <div class="form-group">
-          <label for="modal-emp-hora">Novo Horário Limite (Reset Cronômetro)</label>
-          <input type="time" id="modal-emp-hora" />
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-success" id="btn-modal-emp-salvar">Salvar Alterações</button>
-        <button class="btn btn-secondary" id="btn-modal-emp-cancelar">Cancelar</button>
-        <button class="btn btn-danger" id="btn-modal-emp-excluir">Excluir Registro</button>
       </div>
     </div>
   </div>
